@@ -1,5 +1,8 @@
 ﻿using GradeBook.GradeBooks;
+using Newtonsoft.Json.Linq;
 using System;
+using System.IO;
+using System.Reflection.Metadata;
 
 namespace GradeBook.UserInterfaces
 {
@@ -34,27 +37,32 @@ namespace GradeBook.UserInterfaces
         public static void CreateCommand(string command)
         {
             var parts = command.Split(' ');
-            if (parts.Length != 3)
+            if (parts.Length != 4)
             {
-                Console.WriteLine("Command not valid, Create requires a name and type of gradebook.");
+                Console.WriteLine("Command not valid, Create requires a name, type of gradebook, if it's weighted (true / false).");
                 return;
             }
+
             var name = parts[1];
-            var type = parts[2];
+            bool isWeighted = bool.Parse(parts[3]);
+
             BaseGradeBook gradeBook;
-            switch (type.ToLower())
+
+            if (parts[2] == "standard")
             {
-                case "standard":
-                    gradeBook = new StandardGradeBook(name);
-                    break;
-                case "ranked":
-                    gradeBook = new RankedGradeBook(name);
-                    break;
-                default:
-                    Console.WriteLine("{0} is not a supported type of gradebook, please try again", type);
-                    return;
+                gradeBook = new StandardGradeBook(name, isWeighted);
             }
-            Console.WriteLine("Created gradebook {0} of type {1}.", name, type);
+            else if (parts[2] == "ranked")
+            {
+                gradeBook = new RankedGradeBook(name, isWeighted);
+            }
+            else
+            {
+                Console.WriteLine("{0} is not a supported type of gradebook, please try again", parts[2]);
+                return;
+            }
+
+            Console.WriteLine("Created gradebook {0}.", name);
             GradeBookUserInterface.CommandLoop(gradeBook);
         }
 
